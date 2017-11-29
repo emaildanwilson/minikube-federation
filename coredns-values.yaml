@@ -1,0 +1,10 @@
+isClusterService: false
+serviceType: "ClusterIP"
+middleware:
+  kubernetes:
+    enabled: false
+  etcd:
+    enabled: true
+    zones:
+    - "myfed.local."
+    endpoint: "http://etcd.default:2379"
