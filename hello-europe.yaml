@@ -4,6 +4,8 @@ metadata:
   name: hello
   labels:
     name: hello
+  annotations:
+    federation.kubernetes.io/service-ingresses: '{"items": [{"cluster": "us", "items": [{"ip": "192.168.99.101", "hostname": "192.168.99.101"}]}, {"cluster": "europe", "items": [{"ip": "192.168.99.102", "hostname": "192.168.99.102"}]}]}'
 spec:
   type: LoadBalancer
   ports:
@@ -20,7 +22,7 @@ metadata:
     name: hello
   name: hello
   annotations:
-    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "location", "operator": "In", "values": ["europe"]}]
+    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "location", "operator": "In", "values": ["europe"]}]'
 spec:
   replicas: 2
   template:

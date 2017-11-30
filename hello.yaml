@@ -4,6 +4,8 @@ metadata:
   name: hello
   labels:
     name: hello
+  annotations:
+    federation.kubernetes.io/service-ingresses: '{"items": [{"cluster": "us", "items": [{"ip": "192.168.99.101", "hostname": "192.168.99.101"}]}, {"cluster": "europe", "items": [{"ip": "192.168.99.102", "hostname": "192.168.99.102"}]}]}'
 spec:
   type: LoadBalancer
   ports:
