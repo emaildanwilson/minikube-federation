@@ -36,3 +36,21 @@ spec:
         ports:
         - containerPort: 8080
           name: http-server
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello
+  namespace: default
+spec:
+  rules:
+  - host: hello.default.myfed.svc.myzone
+    http:
+      paths:
+      - backend:
+          serviceName: hello
+          servicePort: 80
+        path: /
+  tls:
+  - hosts:
+    - hello.default.myfed.svc.myzone

@@ -6,5 +6,5 @@ middleware:
   etcd:
     enabled: true
     zones:
-    - "myfed.local."
+    - "myzone."
     endpoint: "http://etcd.default:2379"
