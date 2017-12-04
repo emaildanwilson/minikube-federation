@@ -32,6 +32,11 @@ etcd is used by a federation plugin to write dns records.
   ```console
   kubectl run etcd --image=quay.io/coreos/etcd:v2.3.7 --env="ETCD_LISTEN_CLIENT_URLS=http://0.0.0.0:2379" --env="ETCD_ADVERTISE_CLIENT_URLS=http://etcd.default:2379" --port=2379 --expose --context=minikube
   ```
+  
+  ```console
+  service "etcd" created
+  deployment "etcd" created
+  ```
 
 ###### 2.2 deploy coredns to the minikube cluster
 
@@ -63,9 +68,14 @@ Install coredns using helm.
 
 Verify that coredns is running
 
-```console
-kubectl get svc,pods -l app=coredns-coredns --context=minikube
-```
+  ```console
+  kubectl get svc,pods -l app=coredns-coredns --context=minikube
+  ```
+  
+  ```console
+  NAME                               READY     STATUS    RESTARTS   AGE
+  coredns-coredns-5985d8488f-wm67q   1/1       Running   0          1m
+  ```
 
 ## 3. Start additional minikube clusters
 
@@ -78,7 +88,7 @@ kubectl get svc,pods -l app=coredns-coredns --context=minikube
 
 3.2 label zones & regions on the nodes (cloud provider magic)
 
-  ```
+  ```console
   kubectl label node us failure-domain.beta.kubernetes.io/zone=us1 failure-domain.beta.kubernetes.io/region=us --context=us
   kubectl label node europe failure-domain.beta.kubernetes.io/zone=europe1 failure-domain.beta.kubernetes.io/region=europe --context=europe
   ```
@@ -113,6 +123,27 @@ Check the federation controller logs
   ```console
   kubectl logs -l module=federation-controller-manager --context=minikube -n federation-system
   ```
+  
+They should look similar to this
+
+  ```console
+  controllermanager.go:93] v1.8.0
+  clustercontroller.go:63] Starting cluster controller
+  coredns.go:67] Using CoreDNS DNS provider
+  controllermanager.go:263] horizontalpodautoscalers controller disabled because API Server does not have required resources
+  servicecontroller.go:238] Starting federation service controller
+  dns.go:131] Starting federation service dns controller
+  controller.go:104] Starting federated sync controller for namespace resources
+  controller.go:104] Starting federated sync controller for replicaset resources
+  controller.go:104] Starting federated sync controller for secret resources
+  controller.go:104] Starting federated sync controller for configmap resources
+  controller.go:104] Starting federated sync controller for daemonset resources
+  controller.go:104] Starting federated sync controller for deployment resources
+  controllermanager.go:263] jobs controller disabled because API Server does not have required resources
+  ingress_controller.go:314] Starting Ingress Controller
+  ingress_controller.go:316] ... Starting Ingress Federated Informer
+  ingress_controller.go:318] ... Starting ConfigMap Federated Informer
+  ```
 
 ###### 4.2 change client to the federation api & create the default namespace
 
@@ -137,10 +168,16 @@ These labels are not required but can be used by the cluster selector or OPA pol
   kubectl label cluster europe environment=prod location=europe pciCompliant=true
   ```
 
-view the labels
+view the labels and make sure the clusters go to a `Ready` state
+
+  ```console
+  kubectl get clusters -L environment -L location -L pciCompliant
+  ```
 
   ```
-  kubectl get clusters -L environment -L location -L pciCompliant
+  NAME      STATUS    AGE       ENVIRONMENT   LOCATION   PCICOMPLIANT
+  europe    Ready     1m        prod          europe     true
+  us        Ready     1m        test          us         false
   ```
 
 # 5 Launch APP and Explore
@@ -148,10 +185,13 @@ view the labels
 ###### 5.1 Start a Federated APP
 
 Inspect the contents of `hello.yaml`.
-Then apply it to the federation API.
+
+A special annotation has been added to the service object to identify these endpoints to federation. This is required in order to tell the federation controller to add these records to etcd (which are then read by coredns)
+
+Apply the yaml to the federation API.
 
   ```console
-  kubectl apply -f ./hello.yaml
+  kubectl apply -f ./hello.yaml --context=myfed
   ```
 
 check for objects in each cluster
@@ -165,6 +205,13 @@ check for dns records
 
   ```console
   kubectl run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools --context=minikube
+  ```
+  
+You should see a command prompt of `dnstools#`
+
+Execute a DNS query and exit
+
+  ```console
   dnstools# nslookup hello.default.myfed.svc.myzone coredns-coredns.default
   Server:		10.0.0.10
   Address:	10.0.0.10#53
@@ -173,11 +220,15 @@ check for dns records
   Address: 192.168.99.101
   Name:	hello.default.myfed.svc.myzone
   Address: 192.168.99.102
+  dnstools# exit
+  pod default/dnstools terminated (Error)
   ```
+  
+Notice that both of the cluster endpoints are registered in DNS
 
 ###### 5.2 Scale up
 
-  ```
+  ```console
   kubectl scale rs/hello --replicas=3
   ```
 
@@ -192,13 +243,14 @@ Check that the total count is now 3 across the clusters
 
 Inspect the contents of `hello-europe.yaml`.
 Notice the additional annotation for `federation.alpha.kubernetes.io/cluster-selector`. 
-Then apply it to the federation API.
+
+Apply the yaml to the federation API.
 
   ```console
   kubectl apply -f ./hello-europe.yaml
   ```
 
-verify that both replicas are running in europe now
+verify that all replicas are running in europe now
 
   ```console
   kubectl get rs,po --context=us
