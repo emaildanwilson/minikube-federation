@@ -26,7 +26,7 @@ This cluster will store the federation api/controller, etcd v2 and coredns.
   minikube start -p minikube
   ```
 
-###### 2.1 deploy etcd v2 to the minikube cluster
+##### 2.1 deploy etcd v2 to the minikube cluster
 etcd is used by a federation plugin to write dns records.
 
   ```console
@@ -38,7 +38,7 @@ etcd is used by a federation plugin to write dns records.
   deployment "etcd" created
   ```
 
-###### 2.2 deploy coredns to the minikube cluster
+##### 2.2 deploy coredns to the minikube cluster
 
 We'll install and configure coredns using helm.
 coredns then reads from etcd as its dnszone configuration.
@@ -79,21 +79,21 @@ Verify that coredns is running
 
 ## 3. Start additional minikube clusters
 
-3.1 These clusters will be joined to federation and receive objects from the federation controllers.
+##### 3.1 These clusters will be joined to federation and receive objects from the federation controllers.
 
   ```console
   minikube start -p us
   minikube start -p europe
   ```
 
-3.2 label zones & regions on the nodes (cloud provider magic)
+##### 3.2 label zones & regions on the nodes (cloud provider magic)
 
   ```console
   kubectl label node us failure-domain.beta.kubernetes.io/zone=us1 failure-domain.beta.kubernetes.io/region=us --context=us
   kubectl label node europe failure-domain.beta.kubernetes.io/zone=europe1 failure-domain.beta.kubernetes.io/region=europe --context=europe
   ```
 
-3.3 Add configmap objects used by federated ingress.
+##### 3.3 Add configmap objects used by federated ingress.
 The uid is normally globally unique.
 
   ```console
@@ -101,9 +101,9 @@ The uid is normally globally unique.
   kubectl create configmap ingress-uid --from-literal=uid=europe1 -n kube-system --context=europe
   ```
 
-# 4. Setup and Configure Federation
+## 4. Setup and Configure Federation
 
-###### 4.1 Start the Federation API and Controller
+##### 4.1 Start the Federation API and Controller
 
 Notice that the dns provider config is passed in from the local file coredns-provider.conf.
 
@@ -145,21 +145,21 @@ They should look similar to this
   ingress_controller.go:318] ... Starting ConfigMap Federated Informer
   ```
 
-###### 4.2 change client to the federation api & create the default namespace
+##### 4.2 change client to the federation api & create the default namespace
 
   ```console
   kubectl config use-context myfed
   kubectl create ns default
   ```
 
-###### 4.3 join the us & europe clusters to the federation controller
+##### 4.3 join the us & europe clusters to the federation controller
 
   ```console
   kubefed join us --host-cluster-context=minikube
   kubefed join europe --host-cluster-context=minikube
   ```
 
-###### 4.4 label the clusters
+##### 4.4 label the clusters
 
 These labels are not required but can be used by the cluster selector or OPA policies.
 
@@ -180,9 +180,9 @@ view the labels and make sure the clusters go to a `Ready` state
   us        Ready     1m        test          us         false
   ```
 
-# 5 Launch APP and Explore
+## 5 Launch APP and Explore
 
-###### 5.1 Start a Federated APP
+##### 5.1 Start a Federated APP
 
 Inspect the contents of `hello.yaml`.
 
@@ -226,7 +226,7 @@ Execute a DNS query and exit
   
 Notice that both of the cluster endpoints are registered in DNS
 
-###### 5.2 Scale up
+##### 5.2 Scale up
 
   ```console
   kubectl scale rs/hello --replicas=3
@@ -239,7 +239,7 @@ Check that the total count is now 3 across the clusters
   kubectl get rs,po --context=europe
   ```
 
-###### 5.2 Select only europe w/ the cluster-selector
+##### 5.2 Select only europe w/ the cluster-selector
 
 Inspect the contents of `hello-europe.yaml`.
 Notice the additional annotation for `federation.alpha.kubernetes.io/cluster-selector`. 
