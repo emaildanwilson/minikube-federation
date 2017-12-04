@@ -239,18 +239,18 @@ Check that the total count is now 3 across the clusters
   kubectl get rs,po --context=europe
   ```
 
-##### 5.2 Select only europe w/ the cluster-selector
+##### 5.2 Select by labels w/ the cluster-selector
 
-Inspect the contents of `hello-europe.yaml`.
+Inspect the contents of `hello-selector.yaml`.
 Notice the additional annotation for `federation.alpha.kubernetes.io/cluster-selector`. 
 
 Apply the yaml to the federation API.
 
   ```console
-  kubectl apply -f ./hello-europe.yaml
+  kubectl apply -f ./hello-selector.yaml
   ```
 
-verify that all replicas are running in europe now
+verify that all replicas are now running in europe because that cluster has labels matching the selector 
 
   ```console
   kubectl get rs,po --context=us

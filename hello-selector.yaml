@@ -6,7 +6,7 @@ metadata:
     name: hello
   annotations:
     federation.kubernetes.io/service-ingresses: '{"items": [{"cluster": "europe", "items": [{"ip": "192.168.99.102", "hostname": "192.168.99.102"}]}]}'
-    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "location", "operator": "In", "values": ["europe"]}]'
+    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "environment", "operator": "In", "values": ["prod"]}, {"key": "pciCompliant", "operator": "In", "values": ["true"]}]'
 spec:
   type: LoadBalancer
   ports:
@@ -23,7 +23,7 @@ metadata:
     name: hello
   name: hello
   annotations:
-    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "location", "operator": "In", "values": ["europe"]}]'
+    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "environment", "operator": "In", "values": ["prod"]}, {"key": "pciCompliant", "operator": "In", "values": ["true"]}]'
 spec:
   replicas: 3
   template:
@@ -44,7 +44,7 @@ metadata:
   name: hello
   namespace: default
   annotations:
-    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "location", "operator": "In", "values": ["europe"]}]'
+    federation.alpha.kubernetes.io/cluster-selector: '[{"key": "environment", "operator": "In", "values": ["prod"]}, {"key": "pciCompliant",  "operator": "In", "values": ["true"]}]'
 spec:
   rules:
   - host: hello.default.myfed.svc.myzone
