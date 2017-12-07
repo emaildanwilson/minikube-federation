@@ -20,13 +20,6 @@ The repo stores a few configuration files and the k8s yaml for a sample federate
 
 ## 2. Create the minikube cluster
 
-Optional: Delete minikube cluster if it exists already.
-
-  ```console
-  minikube delete
-  rm -rf ~/.minikube
-  ```
-
 This cluster will store the federation api/controller, etcd v2 and coredns.
 
   ```console
