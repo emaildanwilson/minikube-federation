@@ -20,6 +20,13 @@ The repo stores a few configuration files and the k8s yaml for a sample federate
 
 ## 2. Create the minikube cluster
 
+Optional: Delete minikube cluster if it exists already.
+
+  ```console
+  minikube delete
+  rm -rf ~/.minikube
+  ```
+
 This cluster will store the federation api/controller, etcd v2 and coredns.
 
   ```console
@@ -84,6 +91,14 @@ Verify that coredns is running
   ```console
   minikube start -p us
   minikube start -p europe
+  ```
+
+Optional: Disable the dashboard on all clusters to save CPU
+
+  ```console
+  minikube addons disable dashboard -p minikube
+  minikube addons disable dashboard -p us
+  minikube addons disable dashboard -p europe
   ```
 
 ##### 3.2 label zones & regions on the nodes (cloud provider magic)
